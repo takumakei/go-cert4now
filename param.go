@@ -19,6 +19,7 @@ type param struct {
 
 	commonName            string
 	serialNumber          *big.Int
+	genSigner             func() (crypto.Signer, error)
 	signer                crypto.Signer
 	notBefore             time.Time
 	notAfter              time.Time
@@ -60,11 +61,13 @@ func (p *param) fill() (err error) {
 		p.commonName = "Self Signed Cert " + hex.EncodeToString(sn)
 	}
 
-	if p.signer == nil {
+	if genSigner := p.genSigner; genSigner == nil {
 		p.signer, err = rsa.GenerateKey(rand.Reader, 2048)
-		if err != nil {
-			return
-		}
+	} else {
+		p.signer, err = genSigner()
+	}
+	if err != nil {
+		return
 	}
 
 	if p.notBefore.IsZero() {

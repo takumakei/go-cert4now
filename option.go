@@ -58,21 +58,27 @@ func AddDate(years, months, days int) Option {
 // Signer returns an option of setting the private key.
 func Signer(signer crypto.Signer) Option {
 	return func(p *param) {
-		p.signer = signer
+		p.genSigner = func() (crypto.Signer, error) {
+			return signer, nil
+		}
 	}
 }
 
 // RSA returns an option of generating then setting the private key.
 func RSA(bits int) Option {
 	return func(p *param) {
-		p.signer, p.err = rsa.GenerateKey(rand.Reader, bits)
+		p.genSigner = func() (crypto.Signer, error) {
+			return rsa.GenerateKey(rand.Reader, bits)
+		}
 	}
 }
 
 // ECDSA returns an option of generating then setting the private key.
 func ECDSA(c elliptic.Curve) Option {
 	return func(p *param) {
-		p.signer, p.err = ecdsa.GenerateKey(c, rand.Reader)
+		p.genSigner = func() (crypto.Signer, error) {
+			return ecdsa.GenerateKey(c, rand.Reader)
+		}
 	}
 }
 
