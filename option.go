@@ -90,21 +90,35 @@ func ExtKeyUsage(usage ...x509.ExtKeyUsage) Option {
 	}
 }
 
-// DNSNames returns an option of setting the DNSNames.
-func DNSNames(names ...string) Option {
+// DNSNamesReset returns an option of setting the DNSNames.
+func DNSNamesReset(names ...string) Option {
 	return func(p *param) {
 		p.dnsNames = names
 	}
 }
 
-// EmailAddresses returns an option of setting the EmailAddresses.
-func EmailAddresses(emails ...string) Option {
+// DNSNames returns an option of appending the DNSNames.
+func DNSNames(names ...string) Option {
+	return func(p *param) {
+		p.dnsNames = append(p.dnsNames, names...)
+	}
+}
+
+// EmailAddressesReset returns an option of setting the EmailAddresses.
+func EmailAddressesReset(emails ...string) Option {
 	return func(p *param) {
 		p.emailAddresses = emails
 	}
 }
 
-// Names returns an option of setting DNSNames and IPAddresses.
+// EmailAddresses returns an option of appending the EmailAddresses.
+func EmailAddresses(emails ...string) Option {
+	return func(p *param) {
+		p.emailAddresses = append(p.emailAddresses, emails...)
+	}
+}
+
+// Names returns an option of appending DNSNames and IPAddresses.
 // For each of names, the name that success to net.ParseIP is appended to IPAddresses.
 // The name that failed to net.ParseIP is appended to DNSNames.
 func Names(names ...string) Option {
@@ -118,15 +132,22 @@ func Names(names ...string) Option {
 				dns = append(dns, v)
 			}
 		}
-		p.ipAddresses = ips
-		p.dnsNames = dns
+		p.ipAddresses = append(p.ipAddresses, ips...)
+		p.dnsNames = append(p.dnsNames, dns...)
 	}
 }
 
-// IPAddresses returns an option of setting the IPAddresses.
-func IPAddresses(ips ...net.IP) Option {
+// IPAddressesReset returns an option of setting the IPAddresses.
+func IPAddressesReset(ips ...net.IP) Option {
 	return func(p *param) {
 		p.ipAddresses = ips
+	}
+}
+
+// IPAddresses returns an option of appending the IPAddresses.
+func IPAddresses(ips ...net.IP) Option {
+	return func(p *param) {
+		p.ipAddresses = append(p.ipAddresses, ips...)
 	}
 }
 
