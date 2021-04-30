@@ -104,15 +104,23 @@ func EmailAddresses(emails ...string) Option {
 	}
 }
 
-// IPs returns an option of setting the IPAddresses.
-func IPs(ips ...string) Option {
-	a := make([]net.IP, 0, len(ips))
-	for _, e := range ips {
-		if ip := net.ParseIP(e); ip != nil {
-			a = append(a, ip)
+// Names returns an option of setting DNSNames and IPAddresses.
+// For each of names, the name that success to net.ParseIP is appended to IPAddresses.
+// The name that failed to net.ParseIP is appended to DNSNames.
+func Names(names ...string) Option {
+	return func(p *param) {
+		var ips []net.IP
+		var dns []string
+		for _, v := range names {
+			if ip := net.ParseIP(v); ip != nil {
+				ips = append(ips, ip)
+			} else {
+				dns = append(dns, v)
+			}
 		}
+		p.ipAddresses = ips
+		p.dnsNames = dns
 	}
-	return IPAddresses(a...)
 }
 
 // IPAddresses returns an option of setting the IPAddresses.

@@ -38,8 +38,7 @@ func Example() {
 		cert, err := cert4now.Generate(
 			cert4now.Authority(ca),
 			cert4now.CommonName("Leaf certificate"),
-			cert4now.DNSNames("localhost"),
-			cert4now.IPs("127.0.0.1"),
+			cert4now.Names("localhost", "127.0.0.1"),
 			cert4now.IsCA(false),
 		)
 		if err != nil {
