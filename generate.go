@@ -21,8 +21,14 @@ func Generate(options ...Option) (cert tls.Certificate, err error) {
 		return
 	}
 
+	var signer crypto.Signer
+	signer, err = p.genSigner()
+	if err != nil {
+		return
+	}
+
 	var skid []byte
-	skid, err = calculateSKID(p.signer.Public())
+	skid, err = calculateSKID(signer.Public())
 	if err != nil {
 		return
 	}
@@ -30,7 +36,7 @@ func Generate(options ...Option) (cert tls.Certificate, err error) {
 	var akid []byte
 	authorityKey := p.authorityKey
 	if authorityKey == nil {
-		authorityKey = p.signer
+		authorityKey = signer
 	} else {
 		akid, err = calculateSKID(authorityKey.Public())
 		if err != nil {
@@ -63,13 +69,13 @@ func Generate(options ...Option) (cert tls.Certificate, err error) {
 	}
 
 	var der []byte
-	der, err = x509.CreateCertificate(rand.Reader, template, authority, p.signer.Public(), authorityKey)
+	der, err = x509.CreateCertificate(rand.Reader, template, authority, signer.Public(), authorityKey)
 	if err != nil {
 		return
 	}
 
 	cert.Certificate = [][]byte{der}
-	cert.PrivateKey = p.signer
+	cert.PrivateKey = signer
 
 	if len(p.chain) > 0 {
 		cert.Certificate = append(cert.Certificate, p.chain...)

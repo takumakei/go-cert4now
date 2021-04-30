@@ -3,7 +3,6 @@ package cert4now
 import (
 	"crypto"
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/hex"
 	"math"
@@ -20,7 +19,6 @@ type param struct {
 	commonName            string
 	serialNumber          *big.Int
 	genSigner             func() (crypto.Signer, error)
-	signer                crypto.Signer
 	notBefore             time.Time
 	notAfter              time.Time
 	keyUsage              x509.KeyUsage
@@ -61,13 +59,8 @@ func (p *param) fill() (err error) {
 		p.commonName = "Self Signed Cert " + hex.EncodeToString(sn)
 	}
 
-	if genSigner := p.genSigner; genSigner == nil {
-		p.signer, err = rsa.GenerateKey(rand.Reader, 2048)
-	} else {
-		p.signer, err = genSigner()
-	}
-	if err != nil {
-		return
+	if p.genSigner == nil {
+		RSA(2048)(p)
 	}
 
 	if p.notBefore.IsZero() {
