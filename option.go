@@ -106,9 +106,11 @@ func EmailAddresses(emails ...string) Option {
 
 // IPs returns an option of setting the IPAddresses.
 func IPs(ips ...string) Option {
-	a := make([]net.IP, len(ips))
-	for i, e := range ips {
-		a[i] = net.ParseIP(e)
+	a := make([]net.IP, 0, len(ips))
+	for _, e := range ips {
+		if ip := net.ParseIP(e); ip != nil {
+			a = append(a, ip)
+		}
 	}
 	return IPAddresses(a...)
 }
