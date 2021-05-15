@@ -1,6 +1,8 @@
 Certificate for now
 ======================================================================
 
+[![GoDoc](https://pkg.go.dev/badge/github.com/takumakei/go-cert4now)](https://godoc.org/github.com/takumakei/go-cert4now)
+
 Purpose
 ----------------------------------------------------------------------
 
