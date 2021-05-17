@@ -98,6 +98,7 @@ func ExtKeyUsage(usage ...x509.ExtKeyUsage) Option {
 
 // DNSNamesReset returns an option of setting the DNSNames.
 func DNSNamesReset(names ...string) Option {
+	names = filterNonEmptyString(names)
 	return func(p *param) {
 		p.dnsNames = names
 	}
@@ -105,6 +106,7 @@ func DNSNamesReset(names ...string) Option {
 
 // DNSNames returns an option of appending the DNSNames.
 func DNSNames(names ...string) Option {
+	names = filterNonEmptyString(names)
 	return func(p *param) {
 		p.dnsNames = append(p.dnsNames, names...)
 	}
@@ -112,6 +114,7 @@ func DNSNames(names ...string) Option {
 
 // EmailAddressesReset returns an option of setting the EmailAddresses.
 func EmailAddressesReset(emails ...string) Option {
+	emails = filterNonEmptyString(emails)
 	return func(p *param) {
 		p.emailAddresses = emails
 	}
@@ -119,6 +122,7 @@ func EmailAddressesReset(emails ...string) Option {
 
 // EmailAddresses returns an option of appending the EmailAddresses.
 func EmailAddresses(emails ...string) Option {
+	emails = filterNonEmptyString(emails)
 	return func(p *param) {
 		p.emailAddresses = append(p.emailAddresses, emails...)
 	}
@@ -132,10 +136,12 @@ func Names(names ...string) Option {
 		var ips []net.IP
 		var dns []string
 		for _, v := range names {
-			if ip := net.ParseIP(v); ip != nil {
-				ips = append(ips, ip)
-			} else {
-				dns = append(dns, v)
+			if len(v) > 0 {
+				if ip := net.ParseIP(v); ip != nil {
+					ips = append(ips, ip)
+				} else {
+					dns = append(dns, v)
+				}
 			}
 		}
 		p.ipAddresses = append(p.ipAddresses, ips...)
@@ -145,6 +151,7 @@ func Names(names ...string) Option {
 
 // IPAddressesReset returns an option of setting the IPAddresses.
 func IPAddressesReset(ips ...net.IP) Option {
+	ips = filterNonEmptyIP(ips)
 	return func(p *param) {
 		p.ipAddresses = ips
 	}
@@ -152,6 +159,7 @@ func IPAddressesReset(ips ...net.IP) Option {
 
 // IPAddresses returns an option of appending the IPAddresses.
 func IPAddresses(ips ...net.IP) Option {
+	ips = filterNonEmptyIP(ips)
 	return func(p *param) {
 		p.ipAddresses = append(p.ipAddresses, ips...)
 	}
@@ -190,4 +198,34 @@ func Authority(cert tls.Certificate) Option {
 		}
 		p.chain = cert.Certificate
 	}
+}
+
+func filterNonEmptyString(a []string) []string {
+	for i, v := range a {
+		if len(v) == 0 {
+			b := a[:i]
+			for _, v := range a[i+1:] {
+				if len(v) > 0 {
+					b = append(b, v)
+				}
+			}
+			return b
+		}
+	}
+	return a
+}
+
+func filterNonEmptyIP(a []net.IP) []net.IP {
+	for i, v := range a {
+		if len(v) == 0 {
+			b := a[:i]
+			for _, v := range a[i+1:] {
+				if len(v) > 0 {
+					b = append(b, v)
+				}
+			}
+			return b
+		}
+	}
+	return a
 }
