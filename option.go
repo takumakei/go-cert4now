@@ -8,6 +8,7 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"errors"
 	"math/big"
 	"net"
@@ -17,10 +18,20 @@ import (
 // Option represents an option for generating a certificate.
 type Option func(*param)
 
+// Subject returns an option of setting the subject.
+func Subject(name pkix.Name) Option {
+	return func(p *param) {
+		p.subject = &name
+	}
+}
+
 // CommonName returns an option of setting the common name.
 func CommonName(name string) Option {
 	return func(p *param) {
-		p.commonName = name
+		if p.subject == nil {
+			p.subject = &pkix.Name{}
+		}
+		p.subject.CommonName = name
 	}
 }
 

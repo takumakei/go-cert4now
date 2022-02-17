@@ -46,7 +46,7 @@ func Generate(options ...Option) (cert tls.Certificate, err error) {
 
 	template := &x509.Certificate{
 		SerialNumber: p.serialNumber,
-		Subject:      pkix.Name{CommonName: p.commonName},
+		Subject:      *p.subject,
 		NotBefore:    p.notBefore,
 		NotAfter:     p.notAfter,
 		KeyUsage:     p.keyUsage,

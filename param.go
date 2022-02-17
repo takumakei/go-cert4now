@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/hex"
 	"math"
 	"math/big"
@@ -16,7 +17,7 @@ type param struct {
 	authorityKey crypto.Signer
 	chain        [][]byte
 
-	commonName            string
+	subject               *pkix.Name
 	serialNumber          *big.Int
 	genSigner             func() (crypto.Signer, error)
 	notBefore             time.Time
@@ -51,12 +52,14 @@ func (p *param) fill() (err error) {
 		}
 	}
 
-	if len(p.commonName) == 0 {
+	if p.subject == nil {
 		sn := p.serialNumber.Bytes()
 		if len(sn) > 3 {
 			sn = sn[:3]
 		}
-		p.commonName = "Self Signed Cert " + hex.EncodeToString(sn)
+		p.subject = &pkix.Name{
+			CommonName: "Self Signed Cert " + hex.EncodeToString(sn),
+		}
 	}
 
 	if p.genSigner == nil {
